@@ -12,10 +12,18 @@ class computor :
         self.discr = 0.0
 
     def get_input(self) :
+        check = False
 
-        if len(sys.argv) != 2 :
-            print ("Warning: no arguments were provided.")
-            check = False
+        if len(sys.argv) == 2 :
+            self.input = sys.argv[1]
+            if (len(self.input) >= 5) :
+                check = self.parse_input()
+            if (check == False) :
+                print ("Error: input is not a valid expression.")
+                sys.exit()
+        elif len(sys.argv) != 2 :
+            print ("Warning: exactly one argument is required.")
+            
             while check == False :
                 self.cba = [0.0, 0.0, 0.0]
                 self.input = input("Enter an expression: ")
@@ -23,6 +31,8 @@ class computor :
                     check = self.parse_input()
                 else :
                     print ("Error: input is not a valid expression. Try again.")
+		
+			
 
     def parse_input(self) :
 
@@ -102,9 +112,11 @@ class computor :
                     val_is_set = 1
             if len(self.input) == 0 :
                 self.cba[int(cur_power)] += (cur_value * sign * invert_sign)
+            #print (self.cba[2], self.cba[1], self.cba[0])
         if invert_sign > 0 :
             print ("Error: no right part of equation was found")
             return (False)
+        #print (self.cba[2], self.cba[1], self.cba[0])
         return (True)
 
     def display_reduced(self) :
