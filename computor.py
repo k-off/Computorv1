@@ -1,13 +1,10 @@
 import  sys
 from    math import sqrt
 
-POS_EPSILON = 0.0000001
-NEG_EPSILON = -0.0000001
-
 class computor :
 
     def __init__ (self) :
-        self.cba = [0.0, 0.0, 0.0]
+        self.cba = [0] * 1000
         self.degree = 0
         self.discr = 0.0
 
@@ -25,7 +22,7 @@ class computor :
             print ("Warning: exactly one argument is required.")
             
             while check == False :
-                self.cba = [0.0, 0.0, 0.0]
+                self.cba = [0] * 1000
                 self.input = input("Enter an expression: ")
                 if (len(self.input) >= 5) :
                     check = self.parse_input()
@@ -43,8 +40,8 @@ class computor :
         invert_sign = 1
         tmp = 0
 
-        if (set(self.input).issubset("0123456789X+-\*/\^= .") == False) :
-            print ("Error: allowed characters set: `0123456789X+-\*/\^= .`")
+        if (set(self.input).issubset("0123456789xX+-\*/\^= .") == False) :
+            print ("Error: allowed characters set: `0123456789xX+-\*/\^= .`")
             return (False)
         
         while (len(self.input) > 0) :
@@ -81,7 +78,7 @@ class computor :
                     sign = 1
                 sign *= -1
                 self.input = self.input[1:]
-            elif (self.input[0] == 'X') :
+            elif (self.input[0] in 'xX') :
                 if (val_is_set == 0) :
                     cur_value = 1
                     val_is_set = 1
@@ -104,19 +101,28 @@ class computor :
                     self.input = ""
                 if (cur_power == 1) :
                     cur_power = tmp
-                    if (cur_power != int(cur_power) or cur_power < 0 or cur_power > 2) :
-                        print ("Error: power must be integer 0 .. 2. (%.2f - invalid)" %cur_power)
+                    if (cur_power != int(cur_power) or cur_power < 0 or cur_power > 999) :
+                        print ("Error: power must be integer 0 .. 1000. (%.2f - invalid)" %cur_power)
                         return (False)
                 else :
                     cur_value = tmp
                     val_is_set = 1
             if len(self.input) == 0 :
                 self.cba[int(cur_power)] += (cur_value * sign * invert_sign)
-            #print (self.cba[2], self.cba[1], self.cba[0])
+
+        counter = 0
+        for i in self.cba :
+            if (i != 0 and counter > 2) :
+                self.display_reduced()
+                self.display_degree()
+                print ("The polynomial degree is stricly greater than 2, I can't solve.")
+                sys.exit()
+            counter += 1
+
         if invert_sign > 0 :
             print ("Error: no right part of equation was found")
             return (False)
-        #print (self.cba[2], self.cba[1], self.cba[0])
+    
         return (True)
 
     def display_reduced(self) :
@@ -124,7 +130,7 @@ class computor :
 
         sign = ""
         print ("Reduced form:", end=" ")
-        while (i <= 2) :
+        while (i < 1000) :
             if (self.cba[i] != 0) :
                 if (i > 0 and self.cba[i] >= 0) :
                     sign = "+"
@@ -148,7 +154,7 @@ class computor :
 
         sign = ""
         print ("Natural form:", end=" ")       
-        while (i <= 2) :
+        while (i < 1000) :
             if (self.cba[i] != 0) :
                 if (i > 0 and self.cba[i] > 0) :
                     sign = "+"
@@ -158,9 +164,15 @@ class computor :
                 if (i == 0) :
                     print (self.cba[i],  end=" ")
                 elif (i == 1) :
-                    print (sign, self.cba[i], "* X", end=" ")
+                    if (self.cba[i] == 1) :
+                        print (sign, "X", end=" ")
+                    else :
+                        print (sign, self.cba[i], "* X", end=" ")
                 else :
-                    print (sign, self.cba[i], "* X ^", i, end=" ")
+                    if (self.cba[i] == 1) :
+                        print (sign, "X ^", i, end=" ")
+                    else :
+                        print (sign, self.cba[i], "* X ^", i, end=" ")
                 if (sign == "-") :
                     self.cba[i] = -self.cba[i]
             i += 1
@@ -170,7 +182,7 @@ class computor :
             print ("= 0")
 
     def display_degree(self) :
-        i = 2
+        i = 999
 
         while (i >= 0) :
             self.degree = i
