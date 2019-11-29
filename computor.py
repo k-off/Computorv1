@@ -110,15 +110,6 @@ class computor :
             if len(self.input) == 0 :
                 self.cba[int(cur_power)] += (cur_value * sign * invert_sign)
 
-        counter = 0
-        for i in self.cba :
-            if (i != 0 and counter > 2) :
-                self.display_reduced()
-                self.display_degree()
-                print ("The polynomial degree is stricly greater than 2, I can't solve.")
-                sys.exit()
-            counter += 1
-
         if invert_sign > 0 :
             print ("Error: no right part of equation was found")
             return (False)
@@ -188,6 +179,9 @@ class computor :
             self.degree = i
             if self.cba[i] != 0 :
                 print ("Polynomial degree:", self.degree)
+                if (i > 2) :
+                    print ("The polynomial degree is stricly greater than 2, I can't solve.")
+                    sys.exit()
                 return
             i -= 1
         print ("Polynomial degree:", self.degree)
