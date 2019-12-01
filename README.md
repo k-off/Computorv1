@@ -16,7 +16,6 @@ Objetive is to create a program to solve equations of degree 0 to 2. Project is 
 Clone and change directory to project, then:
 
 	python3 computor.py [equation]
-	python3 predict.py your_desired_mileage
 
 ### Additionaly supports
 
