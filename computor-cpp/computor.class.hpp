@@ -25,5 +25,4 @@ public:
 private:
 	bool								add_values(float& k, float& p, char& s);
 	std::map<int, std::vector<float>>	values_;
-	std::vector<float>					result_;
 };

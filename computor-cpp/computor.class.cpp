@@ -14,9 +14,7 @@
 
 using namespace std;
 
-Computor::Computor() {
-	result_ = {NAN, NAN};
-}
+Computor::Computor() {}
 
 Computor::~Computor() {
 	cout << "\nComputor is shutting down" << endl;
@@ -104,7 +102,11 @@ int		Computor::parseArgument() {
 	cout << "Type entire expression: ";
 	getline(cin, s);
 	for (auto i = 0u; i < s.size(); i++) {
-		if (isdigit(s[i]) && !isdigit(s[i + 1]) && s[i + 1] != '.') { s.insert(i + 1, " "); }
+		if (isdigit(s[i]) && s[i + 1] != '.' && !isdigit(s[i + 1])) { s.insert(i + 1, " "); }
+		if (s[i] == '.') {
+			if ( (i == 0 || (i > 0 && !isdigit(s[i - 1]) )) && isdigit(s[i + 1])) { s.insert(i, "0"); }
+			else if ( i > 0 && !isdigit(s[i + 1]) && isdigit(s[i - 1])) { s.insert(i + 1, "0"); }
+		}
 	}
 	if (s.find("exit") == 0) { return (-1); }
 	stringstream ss(s);
@@ -146,9 +148,15 @@ void	print_values(const map<int, vector<float>>::iterator& b, const map<int, vec
 
 void	solve_linear(map<int, vector<float>>& values_) {
 	if (!values_.count(0)) { values_[0].push_back(0); }
+	if (!values_.count(1)) { values_[1].push_back(0); }
 	float	x = (values_.at(0)[0] ? -values_.at(0)[0] : 0) / values_.at(1)[0];
+	values_.at(0)[0] = -values_.at(0)[0];
 	x = x == 0 ? 0 : x;
 	
+	if (isnan(x) || abs(x) == INFINITY) {
+		cout << "All the real numbers are solution." << endl;
+		return ;
+	}
 	cout << "x = " << values_.at(0)[0] << " / " << values_.at(1)[0] << endl;
 	if (values_.at(0)[0] > 0 && values_.at(1)[0] < 0) {
 		cout << "x = -" << abs(values_.at(0)[0]) << "/" << abs(values_.at(1)[0]) << endl;
@@ -172,6 +180,33 @@ float	sq_rt(float x) {
 	return (res);
 }
 
+void	print_comlex(int index, float r, float i) {
+	cout << "x" << index << " = ";
+	if (r) { cout << r << (index < 2 ? " " : " +"); }
+	
+	cout << (index < 2 ? "-" : "");
+	if (i != 1) { cout << " " << i; }
+	cout << "i" << endl << endl;
+}
+
+void	solve_complex_quadratic(float a, float b, float d)
+{
+	d = -d;
+	float r = -b / (2 * a);
+	r = r == 0 ? 0 : r;
+	float i = abs(sq_rt(d) / (2 * a));
+
+	cout << "x1 = ( -b - sqrt(d) ) / 2a" << endl;
+	cout << "x1 = ( " << (-b == 0 ? 0 : -b) << " - sqrt(" << -d << ") ) / ( 2 * " << a << " )" << endl;
+	cout << "x1 = ( " << (-b == 0 ? 0 : -b) << " - " << sq_rt(d) << "i ) / " << 2 * a << endl;
+	print_comlex(1, r, i);
+
+	cout << "x2 = ( -b + sqrt(d) ) / 2a" << endl;
+	cout << "x2 = ( " << (-b == 0 ? 0 : -b) << " + sqrt(" << d << ") ) / ( 2 * " << a << " )" << endl;
+	cout << "x2 = ( " << (-b == 0 ? 0 : -b) << " + " << sq_rt(d) << "i ) / " << 2 * a << endl;
+	print_comlex(2, r, i);
+}
+
 void	solve_quadratic(map<int, vector<float>>& values_) {
 	float c = values_.count(0) ? values_.at(0)[0] : 0;
 	float b = values_.count(1) ? values_.at(1)[0] : 0;
@@ -182,11 +217,12 @@ void	solve_quadratic(map<int, vector<float>>& values_) {
 	cout << "d = " << b << " * " << b << " - 4 * " << a << " * " << c << endl;
 	cout << "d = " << b * b << " - " << (4 * a * c == 0 ? 0 : 4 * a * c) << endl;
 	float d = b * b - 4 * a * c;
+	d = d == 0 ? 0 : d;
 	cout << "d = " << d << endl << endl;
 	if (d > 0) {
 		cout << "Discriminant is strictly positive, the two solutions are:" << endl;
 		cout << "x1 = ( -b - sqrt(d) ) / 2a" << endl;
-		cout << "x1 = ( " << (-b == 0 ? 0 : -b) << " - sqrt(" << d << ") ) / (2 * " << a << ")" << endl;
+		cout << "x1 = ( " << (-b == 0 ? 0 : -b) << " - sqrt(" << d << ") ) / ( 2 * " << a << " )" << endl;
 		cout << "x1 = ( " << (-b == 0 ? 0 : -b) << " - " << sq_rt(d) << " ) / " << 2 * a << endl;
 		cout << "x1 = " << -b - sq_rt(d) << " / " << 2 * a << endl;
 		if (a < 0 && -b - sq_rt(d) > 0) {
@@ -195,7 +231,7 @@ void	solve_quadratic(map<int, vector<float>>& values_) {
 		cout << "x1 = " << ((-b - sq_rt(d)) / (2 * a) == 0 ? 0 : (-b - sq_rt(d)) / (2 * a)) << endl << endl;
 
 		cout << "x2 = ( -b + sqrt(d) ) / 2a" << endl;
-		cout << "x2 = ( " << (-b == 0 ? 0 : -b) << " + sqrt(" << d << ") ) / (2 * " << a << ")" << endl;
+		cout << "x2 = ( " << (-b == 0 ? 0 : -b) << " + sqrt(" << d << ") ) / ( 2 * " << a << " )" << endl;
 		cout << "x2 = ( " << (-b == 0 ? 0 : -b) << " + " << sq_rt(d) << " ) / " << 2 * a << endl;
 		cout << "x2 = " << -b + sq_rt(d) << " / " << 2 * a << endl;
 		if (a < 0 && -b + sq_rt(d) > 0) {
@@ -213,6 +249,8 @@ void	solve_quadratic(map<int, vector<float>>& values_) {
 		cout << "x = " << (-b / ( 2 * a ) == 0 ? 0 : -b / ( 2 * a )) << endl;
 	} else {
 		cout << "Discriminant is strictly negative, there are no solutions on real numbers space." << endl;
+		cout << "Solving on complex numbers space:" << endl;
+		solve_complex_quadratic(a, b, d);
 	}
 }
 
@@ -230,11 +268,12 @@ void	Computor::calculate() {
 	cout << "Natural form: ";
 	print_values(values_.begin(), values_.end(), 'n');
 	cout << "Polynomial degree: " << max_pow << endl;
-	if (max_pow == 0) {
-		if (!values_.count(0) || values_.at(0)[0] == 0) {cout << "All the real numbers are solution." << endl;}
-		if (values_.count(0) && values_.at(0)[0] != 0) {cout << "Equation does no make sence. Can't solve." << endl;}
+	if (max_pow == 0 && values_.count(0)
+		&& values_.at(0)[0] != 0) {
+		cout << "Equation does no make sence. Can't solve." << endl;
+		return ;
 	}
-	if (max_pow == 1) { solve_linear(values_); }
+	if (max_pow < 2) { solve_linear(values_); }
 	if (max_pow == 2) { solve_quadratic(values_); }
 	if (max_pow > 2) {
 		cout << "The polynomial degree is strictly greater than 2, I can't solve." << endl;
